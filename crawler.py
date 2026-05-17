@@ -23,7 +23,6 @@ def get_etf_kline_data(stock_no="0050"):
     all_data = []
 
     print(f"開始抓取 {stock_no} 過去一年資料...")
-
     headers = {
         "User-Agent": (
             "Mozilla/5.0 "
