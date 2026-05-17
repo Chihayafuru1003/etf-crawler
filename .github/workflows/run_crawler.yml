@@ -1,0 +1,52 @@
+name: Daily ETF Crawler
+
+on:
+  schedule:
+    - cron: '0 8 * * *'
+
+  workflow_dispatch:
+
+jobs:
+
+  run-crawler:
+
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+
+    - name: 1. 下載專案
+      uses: actions/checkout@v4
+
+    - name: 2. 設定 Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: 3. 安裝套件
+      run: |
+        pip install requests pandas openpyxl urllib3
+
+    - name: 4. 執行爬蟲
+      run: |
+        python crawler.py
+
+    - name: 5. 顯示目前資料夾檔案
+      run: |
+        ls -la
+
+    - name: 6. 自動提交更新
+      run: |
+
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+
+        git add .
+
+        git status
+
+        git commit -m "自動更新 ETF 資料" || echo "沒有檔案變更"
+
+        git push
