@@ -2,21 +2,16 @@ name: Daily ETF Crawler
 
 on:
   schedule:
-    - cron: '0 8 * * *'
-
+    - cron: '0 8 * * *' # 台灣時間下午 16:00 執行
   workflow_dispatch:
 
 jobs:
-
   run-crawler:
-
     runs-on: ubuntu-latest
-
     permissions:
       contents: write
 
     steps:
-
     - name: 1. 下載專案
       uses: actions/checkout@v4
 
@@ -25,28 +20,30 @@ jobs:
       with:
         python-version: '3.10'
 
-    - name: 3. 安裝套件
+    # 【核心修正】在 GitHub 虛擬機中安裝 Chrome 瀏覽器環境
+    - name: 3. 安裝 Chrome 瀏覽器與驅動
       run: |
-        pip install requests pandas openpyxl urllib3
+        sudo apt-get update
+        sudo apt-get install -y google-chrome-stable
 
-    - name: 4. 執行爬蟲
+    # 【核心修正】加上 selenium 套件的安裝
+    - name: 4. 安裝 Python 必要套件
+      run: |
+        pip install requests pandas openpyxl urllib3 selenium
+
+    - name: 5. 執行爬蟲
       run: |
         python crawler.py
 
-    - name: 5. 顯示目前資料夾檔案
+    - name: 6. 顯示目前資料夾檔案
       run: |
         ls -la
 
-    - name: 6. 自動提交更新
+    - name: 7. 自動提交更新
       run: |
-
         git config --local user.email "action@github.com"
         git config --local user.name "GitHub Action"
-
         git add .
-
         git status
-
         git commit -m "自動更新 ETF 資料" || echo "沒有檔案變更"
-
         git push
