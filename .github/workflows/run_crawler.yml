@@ -1,0 +1,37 @@
+name: Daily ETF Crawler
+
+on:
+  schedule:
+    # 這裡的 Cron 時間是國際標準時 (UTC)
+    # 台灣時間下午 4 點 (16:00)，扣掉 8 小時 = 08:00 UTC
+    - cron: '0 8 * * *'
+  workflow_dispatch: # 保留這個按鈕，讓你們隨時可以點擊手動強制它更新
+
+jobs:
+  run-crawler:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+    - name: 複製專案程式碼
+      uses: actions/checkout@v4
+
+    - name: 設定 Python 環境
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+
+    - name: 安裝爬蟲必要套件
+      run: |
+        pip install requests pandas openpyxl selenium
+
+    - name: 執行 Python 爬蟲
+      run: python crawler.py
+
+    - name: 自動將更新後的檔案推回 GitHub
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add etf_kline.json 0050_一年歷史K線資料.xlsx
+        git diff --quiet && git diff --staged --quiet || (git commit -m "自動更新：每日最新 ETF 資料" && git push)
