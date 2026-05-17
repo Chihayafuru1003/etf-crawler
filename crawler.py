@@ -28,6 +28,7 @@ def get_etf_kline_data(stock_no="0050"):
             f"STOCK_DAY?response=json&date={date_str}&stockNo={stock_no}"
         )
 
+
         try:
             response = requests.get(url, headers=headers, timeout=15, verify=False)
             try:
