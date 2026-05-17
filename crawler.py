@@ -7,7 +7,6 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 def get_etf_kline_data(stock_no="0050"):
     current_date = pd.Timestamp.now()
-    # 建立過去 12 個月的日期清單
     date_list = [current_date - pd.DateOffset(months=i) for i in range(12)]
     date_str_list = [d.strftime("%Y%m%d") for d in date_list]
     all_data = []
@@ -22,11 +21,8 @@ def get_etf_kline_data(stock_no="0050"):
     }
 
     for date_str in reversed(date_str_list):
-        # 【已修正】更正為完全正確的證交所 RWD API 完整路徑
-        url = (
-            "https://twse.com.tw"
-            f"STOCK_DAY?response=json&date={date_str}&stockNo={stock_no}"
-        )
+        # 這裡改用單一引號字串，完全避免括號拼接出錯的可能性
+        url = f"https://twse.com.tw{date_str}&stockNo={stock_no}"
 
         try:
             response = requests.get(url, headers=headers, timeout=15, verify=False)
@@ -42,7 +38,6 @@ def get_etf_kline_data(stock_no="0050"):
             else:
                 print(f"{date_str[:6]} 無資料或請求過快（回應狀態: {json_data.get('stat')}）")
             
-            # 證交所對頻率限制嚴格，請維持至少 3-5 秒延遲
             time.sleep(4)
 
         except Exception as e:
@@ -52,11 +47,9 @@ def get_etf_kline_data(stock_no="0050"):
         print("錯誤：完全沒有抓取到任何資料，請檢查網路或 API。")
         return pd.DataFrame()
 
-    # 證交所回傳的標準 9 個欄位
     columns = ['日期', '成交股數', '成交金額', '開盤價', '最高價', '最低價', '收盤價', '漲跌價差', '成交筆數']
-    
-    # 避免回傳欄位數量與預期不符導致錯誤，先根據實際資料寬度建立 DataFrame
     df = pd.DataFrame(all_data)
+    
     if df.shape[1] >= len(columns):
         df = df.iloc[:, :len(columns)]
         df.columns = columns
@@ -64,7 +57,6 @@ def get_etf_kline_data(stock_no="0050"):
         print("警告：回傳資料欄位數少於預期")
         return df
 
-    # 清除千分位逗號
     for col in ['成交股數', '成交金額', '開盤價', '最高價', '最低價', '收盤價', '成交筆數']:
         if col in df.columns:
             df[col] = df[col].astype(str).str.replace(',', '', regex=False)
