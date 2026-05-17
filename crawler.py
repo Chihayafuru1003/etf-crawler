@@ -50,9 +50,7 @@ def get_etf_kline_data(stock_no="0050"):
 if __name__ == "__main__":
     try:
         etf_df = get_etf_kline_data("0050")
-        
-        etf_df.to_excel("0050_一年歷史K線資料.xlsx", index=False)
-    
+        etf_df.to_excel("0050_kline.xlsx", index=False)
         json_result = etf_df.to_json(orient="records", force_ascii=False)
         with open("etf_kline.json", "w", encoding="utf-8") as f:
             f.write(json_result)
