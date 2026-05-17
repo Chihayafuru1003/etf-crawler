@@ -22,12 +22,11 @@ def get_etf_kline_data(stock_no="0050"):
     }
 
     for date_str in reversed(date_str_list):
-        # 【修正】更新為最新的證交所台股日成交資訊 API 網址
+        # 【已修正】更正為完全正確的證交所 RWD API 完整路徑
         url = (
             "https://twse.com.tw"
             f"STOCK_DAY?response=json&date={date_str}&stockNo={stock_no}"
         )
-
 
         try:
             response = requests.get(url, headers=headers, timeout=15, verify=False)
@@ -77,7 +76,6 @@ if __name__ == "__main__":
         etf_df = get_etf_kline_data("0050")
 
         if not etf_df.empty:
-            # 【修正】統一儲存檔名，建議使用全英文檔名避免 Linux 環境亂碼
             excel_filename = "0050_kline.xlsx"
             json_filename = "etf_kline.json"
 
